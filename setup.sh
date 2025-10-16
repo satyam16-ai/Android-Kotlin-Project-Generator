@@ -148,24 +148,28 @@ fi
 # 4.5. Check Gradle Wrapper
 print_info "Checking Gradle wrapper..."
 if [ ! -f "./gradlew" ]; then
-    print_info "Gradle wrapper not found, generating..."
-    if command -v gradle &> /dev/null; then
-        gradle wrapper
-        chmod +x gradlew
-        print_status "Gradle wrapper created"
-    else
-        print_error "Gradle not found. Installing..."
-        if [ "$MACHINE" = "Mac" ]; then
-            brew install gradle
-            gradle wrapper
-            chmod +x gradlew
-        else
-            sudo apt install -y gradle
-            gradle wrapper
-            chmod +x gradlew
-        fi
-        print_status "Gradle wrapper created"
-    fi
+    print_info "Gradle wrapper not found, downloading and creating..."
+    
+    # Create temp directory
+    GRADLE_TMP=$(mktemp -d)
+    cd "$GRADLE_TMP"
+    
+    # Download Gradle
+    print_info "Downloading Gradle 8.12..."
+    wget -q https://services.gradle.org/distributions/gradle-8.12-bin.zip
+    unzip -q gradle-8.12-bin.zip
+    
+    # Go back to project
+    cd - > /dev/null
+    
+    # Create wrapper
+    "$GRADLE_TMP/gradle-8.12/bin/gradle" wrapper --gradle-version 8.12
+    chmod +x gradlew
+    
+    # Cleanup
+    rm -rf "$GRADLE_TMP"
+    
+    print_status "Gradle wrapper created"
 else
     print_status "Gradle wrapper found"
     chmod +x gradlew
