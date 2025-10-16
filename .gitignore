@@ -86,3 +86,4 @@ jdk-*/
 # Dependencies
 node_modules/
 
+android-kotlin-template/
